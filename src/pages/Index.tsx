@@ -312,53 +312,225 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 bg-primary">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <HardHat className="h-8 w-8 text-construction-orange" />
-                <span className="text-xl font-bold text-primary-foreground">Acronym Infrastructure</span>
+      {/* Enhanced Footer */}
+      <footer className="relative py-16 bg-gradient-to-br from-primary via-primary to-primary/90 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Im0gMTAwIDAgTCAwIDAgMCAxMDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20"></div>
+          <div className="absolute top-10 right-10 w-32 h-32 bg-construction-orange/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 left-20 w-24 h-24 bg-primary-foreground/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="relative container mx-auto px-4">
+          {/* Main Footer Content */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+            {/* Company Info */}
+            <div className="lg:col-span-1 animate-fade-in">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="relative">
+                  <HardHat className="h-10 w-10 text-construction-orange drop-shadow-lg" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-construction-orange rounded-full animate-ping opacity-75"></div>
+                </div>
+                <div>
+                  <span className="text-2xl font-bold text-primary-foreground block leading-tight">Acronym</span>
+                  <span className="text-lg font-semibold text-construction-orange block leading-tight">Infrastructure</span>
+                </div>
               </div>
-              <p className="text-primary-foreground/80 text-sm">
-                Building the infrastructure of tomorrow with expertise, innovation, and commitment to excellence.
+              
+              <p className="text-primary-foreground/80 text-sm leading-relaxed mb-6">
+                Building the infrastructure of tomorrow with expertise, innovation, and unwavering commitment to excellence. Your dreams, our engineering.
               </p>
+              
+              {/* Social Links */}
+              <div className="flex space-x-4">
+                {[
+                  { icon: Phone, label: "Call" },
+                  { icon: Mail, label: "Email" },
+                  { icon: MapPin, label: "Location" }
+                ].map((social, index) => (
+                  <a
+                    key={index}
+                    href="#"
+                    className="group relative w-10 h-10 bg-primary-foreground/10 hover:bg-construction-orange rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-construction"
+                  >
+                    <social.icon className="h-5 w-5 text-primary-foreground group-hover:text-white transition-colors duration-300" />
+                    <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-primary-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {social.label}
+                    </span>
+                  </a>
+                ))}
+              </div>
             </div>
-            
-            <div>
-              <h4 className="font-semibold text-primary-foreground mb-4">Services</h4>
-              <ul className="space-y-2 text-primary-foreground/80 text-sm">
-                <li>Road Construction</li>
-                <li>Infrastructure Development</li>
-                <li>Project Management</li>
-                <li>Consultation Services</li>
+
+            {/* Quick Links */}
+            <div className="animate-fade-in delay-100">
+              <h4 className="font-bold text-primary-foreground text-lg mb-6 relative">
+                Services
+                <div className="absolute bottom-0 left-0 w-8 h-0.5 bg-construction-orange rounded-full"></div>
+              </h4>
+              <ul className="space-y-3">
+                {[
+                  "Road Construction",
+                  "Infrastructure Development", 
+                  "Project Management",
+                  "Engineering Consultation",
+                  "Quality Assurance"
+                ].map((service, index) => (
+                  <li key={index}>
+                    <a
+                      href="#"
+                      className="group flex items-center text-primary-foreground/70 hover:text-construction-orange transition-all duration-300 text-sm"
+                    >
+                      <CheckCircle className="h-3 w-3 mr-2 opacity-50 group-hover:opacity-100 group-hover:text-construction-orange transition-all duration-300" />
+                      <span className="group-hover:translate-x-1 transition-transform duration-300">{service}</span>
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
-            
-            <div>
-              <h4 className="font-semibold text-primary-foreground mb-4">Company</h4>
-              <ul className="space-y-2 text-primary-foreground/80 text-sm">
-                <li>About Us</li>
-                <li>Our Projects</li>
-                <li>Leadership Team</li>
-                <li>Careers</li>
+
+            {/* Company Links */}
+            <div className="animate-fade-in delay-200">
+              <h4 className="font-bold text-primary-foreground text-lg mb-6 relative">
+                Company
+                <div className="absolute bottom-0 left-0 w-8 h-0.5 bg-construction-orange rounded-full"></div>
+              </h4>
+              <ul className="space-y-3">
+                {[
+                  "About Us",
+                  "Our Projects", 
+                  "Leadership Team",
+                  "Careers",
+                  "News & Updates"
+                ].map((link, index) => (
+                  <li key={index}>
+                    <a
+                      href="#"
+                      className="group flex items-center text-primary-foreground/70 hover:text-construction-orange transition-all duration-300 text-sm"
+                    >
+                      <ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">{link}</span>
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
-            
-            <div>
-              <h4 className="font-semibold text-primary-foreground mb-4">Contact</h4>
-              <ul className="space-y-2 text-primary-foreground/80 text-sm">
-                <li>Get Quote</li>
-                <li>Support</li>
-                <li>Office Locations</li>
-                <li>Emergency Contact</li>
-              </ul>
+
+            {/* Contact & Newsletter */}
+            <div className="animate-fade-in delay-300">
+              <h4 className="font-bold text-primary-foreground text-lg mb-6 relative">
+                Get In Touch
+                <div className="absolute bottom-0 left-0 w-8 h-0.5 bg-construction-orange rounded-full"></div>
+              </h4>
+              
+              {/* Quick Contact */}
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-8 h-8 bg-construction-orange/20 rounded-lg flex items-center justify-center">
+                    <Phone className="h-4 w-4 text-construction-orange" />
+                  </div>
+                  <div>
+                    <p className="text-primary-foreground/60 text-xs">Call Us</p>
+                    <p className="text-primary-foreground font-medium">+91 XXX XXX XXXX</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-8 h-8 bg-construction-orange/20 rounded-lg flex items-center justify-center">
+                    <Mail className="h-4 w-4 text-construction-orange" />
+                  </div>
+                  <div>
+                    <p className="text-primary-foreground/60 text-xs">Email Us</p>
+                    <p className="text-primary-foreground font-medium">info@acronymip.com</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3 text-sm">
+                  <div className="w-8 h-8 bg-construction-orange/20 rounded-lg flex items-center justify-center">
+                    <Clock className="h-4 w-4 text-construction-orange" />
+                  </div>
+                  <div>
+                    <p className="text-primary-foreground/60 text-xs">Working Hours</p>
+                    <p className="text-primary-foreground font-medium">Mon-Sat 9AM-6PM</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Newsletter Signup */}
+              <div className="bg-primary-foreground/10 rounded-xl p-4 backdrop-blur-sm">
+                <h5 className="text-primary-foreground font-semibold text-sm mb-2">Project Updates</h5>
+                <p className="text-primary-foreground/60 text-xs mb-3">Get the latest news about our projects</p>
+                <div className="flex space-x-2">
+                  <input
+                    type="email"
+                    placeholder="Your email"
+                    className="flex-1 px-3 py-2 text-xs bg-white/20 border border-white/30 rounded-lg text-primary-foreground placeholder-primary-foreground/50 focus:outline-none focus:ring-2 focus:ring-construction-orange focus:border-transparent"
+                  />
+                  <Button variant="construction" size="sm" className="text-xs px-3">
+                    Subscribe
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <div className="border-t border-primary-foreground/20 pt-8 text-center text-primary-foreground/60 text-sm">
-            <p>© 2024 Acronym Infrastructure Project. All rights reserved. | Led by Md Modassir</p>
+
+          {/* Stats Bar */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 animate-fade-in delay-500">
+            {[
+              { number: "500+", label: "Happy Clients", icon: Users },
+              { number: "1000+", label: "Projects Done", icon: Building },
+              { number: "24/7", label: "Support", icon: Clock },
+              { number: "15+", label: "Years Experience", icon: Award }
+            ].map((stat, index) => (
+              <div
+                key={index}
+                className="group text-center p-4 bg-primary-foreground/10 rounded-xl hover:bg-construction-orange/20 transition-all duration-300 hover:scale-105"
+              >
+                <stat.icon className="h-6 w-6 text-construction-orange mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
+                <div className="text-2xl font-bold text-primary-foreground mb-1">{stat.number}</div>
+                <div className="text-primary-foreground/70 text-xs">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom Section */}
+          <div className="border-t border-primary-foreground/20 pt-8 animate-fade-in delay-700">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              {/* Copyright */}
+              <div className="text-center md:text-left">
+                <p className="text-primary-foreground/60 text-sm">
+                  © 2024 Acronym Infrastructure Project. All rights reserved.
+                </p>
+                <p className="text-construction-orange text-xs font-medium mt-1">
+                  Led by Md Modassir | Building Tomorrow's Infrastructure
+                </p>
+              </div>
+              
+              {/* Legal Links */}
+              <div className="flex space-x-6 text-sm">
+                {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((link, index) => (
+                  <a
+                    key={index}
+                    href="#"
+                    className="text-primary-foreground/60 hover:text-construction-orange transition-colors duration-300 relative group"
+                  >
+                    {link}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-construction-orange transition-all duration-300 group-hover:w-full"></span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Emergency Contact Banner */}
+          <div className="mt-8 bg-construction-orange/20 border border-construction-orange/30 rounded-xl p-4 text-center animate-fade-in delay-1000">
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <Phone className="h-5 w-5 text-construction-orange animate-pulse" />
+              <span className="text-primary-foreground font-semibold">24/7 Emergency Services Available</span>
+            </div>
+            <p className="text-primary-foreground/70 text-sm">
+              Need urgent infrastructure support? Our emergency response team is ready to help.
+            </p>
           </div>
         </div>
       </footer>
