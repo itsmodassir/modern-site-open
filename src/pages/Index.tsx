@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Navigation from "@/components/Navigation";
 import { 
   ArrowRight, 
-  Phone, 
-  Mail, 
-  MapPin, 
   Target, 
   Lightbulb, 
   TrendingUp,
@@ -17,37 +15,16 @@ import {
   Award,
   Clock
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import constructionHero from "@/assets/construction-hero.jpg";
 import infrastructureAbout from "@/assets/infrastructure-about.jpg";
 
-const Index = () => {
-  return (
+  const Index = () => {
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-background/95 backdrop-blur-sm border-b border-border z-50">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
-              <HardHat className="h-8 w-8 text-construction-orange" />
-              <span className="text-xl font-bold text-primary">Acronym Infrastructure Project</span>
-            </div>
-            
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#home" className="text-foreground hover:text-construction-orange transition-colors">Home</a>
-              <a href="#services" className="text-foreground hover:text-construction-orange transition-colors">Services</a>
-              <a href="#about" className="text-foreground hover:text-construction-orange transition-colors">About</a>
-              <a href="#projects" className="text-foreground hover:text-construction-orange transition-colors">Projects</a>
-              <Button variant="construction" size="sm">
-                <Phone className="h-4 w-4 mr-2" />
-                Contact Us
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
-      <section id="home" className="relative pt-16 overflow-hidden">
+      <section className="relative pt-16 overflow-hidden">
         <div className="absolute inset-0">
           <img 
             src={constructionHero} 
@@ -75,14 +52,18 @@ const Index = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <Button variant="hero" size="lg" className="text-lg px-8 py-6">
-                Start Your Project
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Link to="/booking">
+                <Button variant="hero" size="lg" className="text-lg px-8 py-6">
+                  Start Your Project
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
               
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6 bg-white/10 border-white/20 text-white hover:bg-white hover:text-primary">
-                View Our Work
-              </Button>
+              <Link to="/projects">
+                <Button variant="outline" size="lg" className="text-lg px-8 py-6 bg-white/10 border-white/20 text-white hover:bg-white hover:text-primary">
+                  View Our Work
+                </Button>
+              </Link>
             </div>
             
             <div className="flex flex-wrap gap-6 text-primary-foreground/60 text-sm">
@@ -275,14 +256,17 @@ const Index = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="hero" size="lg" className="text-lg px-8 py-6">
-              Get Free Consultation
-              <Phone className="ml-2 h-5 w-5" />
-            </Button>
-            
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6 bg-white/10 border-white/20 text-white hover:bg-white hover:text-primary">
-              View Our Portfolio
-            </Button>
+            <Link to="/booking">
+              <Button variant="hero" size="lg" className="text-lg px-8 py-6">
+                Get Free Consultation
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link to="/contact">
+              <Button variant="outline" size="lg" className="text-lg px-8 py-6 bg-white/10 border-white/20 text-white hover:bg-white hover:text-primary">
+                Contact Us
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
