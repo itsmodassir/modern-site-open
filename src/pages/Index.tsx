@@ -3,7 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import { 
-  ArrowRight, 
+  ArrowRight,
+  Phone,
+  Mail,
+  MapPin,
   Target, 
   Lightbulb, 
   TrendingUp,
@@ -19,7 +22,8 @@ import { Link } from "react-router-dom";
 import constructionHero from "@/assets/construction-hero.jpg";
 import infrastructureAbout from "@/assets/infrastructure-about.jpg";
 
-  const Index = () => {
+const Index = () => {
+  return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
