@@ -48,7 +48,7 @@ const Contact = () => {
       icon: Mail,
       title: "Email Us", 
       description: "Send us your detailed requirements",
-      value: "info@acronymip.com",
+      value: "contact@acronymip.com",
       action: "Send Email",
       available: "24/7 Response"
     },
