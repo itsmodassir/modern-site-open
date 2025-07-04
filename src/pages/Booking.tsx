@@ -140,9 +140,16 @@ const Booking = () => {
             <div className="lg:col-span-2">
               <Card className="shadow-elegant">
                 <CardHeader>
-                  <CardTitle className="text-2xl flex items-center">
-                    <Calendar className="h-6 w-6 text-construction-orange mr-2" />
-                    Book Your Consultation
+                  <CardTitle className="text-2xl flex items-center justify-between">
+                    <div className="flex items-center">
+                      <CalendarIcon className="h-6 w-6 text-construction-orange mr-2" />
+                      Book Your Consultation
+                    </div>
+                    {selectedDate && (
+                      <Badge variant="secondary" className="bg-construction-orange/20 text-construction-orange border-construction-orange/30">
+                        {format(selectedDate, "PPP")}
+                      </Badge>
+                    )}
                   </CardTitle>
                   <CardDescription>
                     Fill out the form below to schedule your free infrastructure consultation with our experts.
@@ -272,34 +279,7 @@ const Booking = () => {
                         <Clock className="h-5 w-5 text-construction-orange mr-2" />
                         Schedule Consultation
                       </h3>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Preferred Date *</Label>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start text-left font-normal",
-                                  !selectedDate && "text-muted-foreground"
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 z-50" align="start" side="bottom" sideOffset={4}>
-                              <Calendar
-                                mode="single"
-                                selected={selectedDate}
-                                onSelect={setSelectedDate}
-                                disabled={(date) => date < new Date() || date.getDay() === 0}
-                                initialFocus
-                                className={cn("p-3 pointer-events-auto")}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
+                      <div className="grid md:grid-cols-1 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="time">Preferred Time *</Label>
                           <Select value={selectedTime} onValueChange={setSelectedTime} required>
@@ -372,6 +352,45 @@ const Booking = () => {
 
             {/* Sidebar */}
             <div className="space-y-6">
+              
+              {/* Date Selection */}
+              <Card className="shadow-construction">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center">
+                    <CalendarIcon className="h-5 w-5 text-construction-orange mr-2" />
+                    Select Date
+                  </CardTitle>
+                  <CardDescription>
+                    Choose your preferred consultation date.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !selectedDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-50" align="start" side="bottom" sideOffset={4}>
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        disabled={(date) => date < new Date() || date.getDay() === 0}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </CardContent>
+              </Card>
               
               {/* Contact Info */}
               <Card className="shadow-construction">
