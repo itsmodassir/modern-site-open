@@ -40,7 +40,7 @@ const Contact = () => {
       icon: Phone,
       title: "Call Us",
       description: "Speak directly with our experts",
-      value: "+91 XXX XXX XXXX",
+      value: "+91 7909015069",
       action: "Call Now",
       available: "Mon-Sat 9AM-6PM"
     },
