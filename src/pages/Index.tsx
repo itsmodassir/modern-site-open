@@ -257,7 +257,7 @@ const Index = () => {
             <div className="p-6">
               <Phone className="h-12 w-12 text-construction-orange mx-auto mb-4" />
               <h3 className="font-semibold text-lg mb-2">Call Us</h3>
-              <p className="text-muted-foreground">+91 XXX XXX XXXX</p>
+              <p className="text-muted-foreground">+91 7909015069</p>
             </div>
             
             <div className="p-6">
