@@ -43,4 +43,4 @@ jobs:
             sudo docker stop modern-site || true
             sudo docker rm modern-site || true
             sudo docker system prune -af || true
-            sudo docker run -itd --name modern-site -p 9000:80 ${{ secrets.DOCKERHUB_USERNAME }}/modern-site-open:latest
+            sudo docker run -itd --name modern-site -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/modern-site-open:latest
