@@ -181,7 +181,7 @@ const Index = () => {
               </h2>
               
               <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                At Acronym Infrastructure Project, we are dedicated to supporting every step of your journey. Whether it's planning, designing, building, or maintaining essential infrastructure, our team of experts is committed to delivering solutions with precision, professionalism, and care.
+                At Modassir Infrastructure Project, we are dedicated to supporting every step of your journey. Whether it's planning, designing, building, or maintaining essential infrastructure, our team of experts is committed to delivering solutions with precision, professionalism, and care.
               </p>
               
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
