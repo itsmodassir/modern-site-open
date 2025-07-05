@@ -1,0 +1,41 @@
+name: modern-site-open
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: mdmodassir/modern-site-open:latest
+
+      - name: docker delete and pull 
+        run: |
+          docker stop mdmodassir/modern-site-open:latest
+          docker rm mdmodassir/modern-site-open:latest
+          docker system prune -a
+          docker pull mdmodassir/modern-site-open:latest
+          docker run -itd --name=container -p 80:80 mdmodassir/modern-site-open:latest
