@@ -47,7 +47,7 @@ const Index = () => {
             <h1 className="text-4xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-tight">
               Give the Drawing,
               <span className="block text-construction-orange">
-                I'll Give You Your Dream
+                I'll Give You Your imagination
               </span>
             </h1>
             
