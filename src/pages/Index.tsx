@@ -2,39 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
-import { 
-  ArrowRight,
-  Phone,
-  Mail,
-  MapPin,
-  Target, 
-  Lightbulb, 
-  TrendingUp,
-  CheckCircle,
-  HardHat,
-  Building,
-  Route,
-  Users,
-  Award,
-  Clock
-} from "lucide-react";
+import { ArrowRight, Phone, Mail, MapPin, Target, Lightbulb, TrendingUp, CheckCircle, HardHat, Building, Route, Users, Award, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import constructionHero from "@/assets/construction-hero.jpg";
 import infrastructureAbout from "@/assets/infrastructure-about.jpg";
-
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Navigation />
 
       {/* Hero Section */}
       <section className="relative pt-16 overflow-hidden">
         <div className="absolute inset-0">
-          <img 
-            src={constructionHero} 
-            alt="Construction Site" 
-            className="w-full h-full object-cover"
-          />
+          <img src={constructionHero} alt="Construction Site" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-hero opacity-90"></div>
         </div>
         
@@ -207,11 +186,7 @@ const Index = () => {
             
             <div className="animate-scale-in">
               <div className="relative">
-                <img 
-                  src={infrastructureAbout} 
-                  alt="Infrastructure Development" 
-                  className="w-full rounded-2xl shadow-elegant"
-                />
+                <img src={infrastructureAbout} alt="Infrastructure Development" className="w-full rounded-2xl shadow-elegant" />
                 <div className="absolute -bottom-6 -left-6 bg-construction-orange text-construction-orange-foreground p-6 rounded-xl shadow-construction">
                   <Award className="h-8 w-8 mb-2" />
                   <div className="font-semibold">Quality Certified</div>
@@ -331,22 +306,21 @@ const Index = () => {
               
               {/* Social Links */}
               <div className="flex space-x-4">
-                {[
-                  { icon: Phone, label: "Call" },
-                  { icon: Mail, label: "Email" },
-                  { icon: MapPin, label: "Location" }
-                ].map((social, index) => (
-                  <a
-                    key={index}
-                    href="#"
-                    className="group relative w-10 h-10 bg-primary-foreground/10 hover:bg-construction-orange rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-construction"
-                  >
+                {[{
+                icon: Phone,
+                label: "Call"
+              }, {
+                icon: Mail,
+                label: "Email"
+              }, {
+                icon: MapPin,
+                label: "Location"
+              }].map((social, index) => <a key={index} href="#" className="group relative w-10 h-10 bg-primary-foreground/10 hover:bg-construction-orange rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-construction">
                     <social.icon className="h-5 w-5 text-primary-foreground group-hover:text-white transition-colors duration-300" />
                     <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-primary-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       {social.label}
                     </span>
-                  </a>
-                ))}
+                  </a>)}
               </div>
             </div>
 
@@ -357,23 +331,12 @@ const Index = () => {
                 <div className="absolute bottom-0 left-0 w-8 h-0.5 bg-construction-orange rounded-full"></div>
               </h4>
               <ul className="space-y-3">
-                {[
-                  "Road Construction",
-                  "Infrastructure Development", 
-                  "Project Management",
-                  "Engineering Consultation",
-                  "Quality Assurance"
-                ].map((service, index) => (
-                  <li key={index}>
-                    <a
-                      href="#"
-                      className="group flex items-center text-primary-foreground/70 hover:text-construction-orange transition-all duration-300 text-sm"
-                    >
+                {["Road Construction", "Infrastructure Development", "Project Management", "Engineering Consultation", "Quality Assurance"].map((service, index) => <li key={index}>
+                    <a href="#" className="group flex items-center text-primary-foreground/70 hover:text-construction-orange transition-all duration-300 text-sm">
                       <CheckCircle className="h-3 w-3 mr-2 opacity-50 group-hover:opacity-100 group-hover:text-construction-orange transition-all duration-300" />
                       <span className="group-hover:translate-x-1 transition-transform duration-300">{service}</span>
                     </a>
-                  </li>
-                ))}
+                  </li>)}
               </ul>
             </div>
 
@@ -384,23 +347,12 @@ const Index = () => {
                 <div className="absolute bottom-0 left-0 w-8 h-0.5 bg-construction-orange rounded-full"></div>
               </h4>
               <ul className="space-y-3">
-                {[
-                  "About Us",
-                  "Our Projects", 
-                  "Leadership Team",
-                  "Careers",
-                  "News & Updates"
-                ].map((link, index) => (
-                  <li key={index}>
-                    <a
-                      href="#"
-                      className="group flex items-center text-primary-foreground/70 hover:text-construction-orange transition-all duration-300 text-sm"
-                    >
+                {["About Us", "Our Projects", "Leadership Team", "Careers", "News & Updates"].map((link, index) => <li key={index}>
+                    <a href="#" className="group flex items-center text-primary-foreground/70 hover:text-construction-orange transition-all duration-300 text-sm">
                       <ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
                       <span className="group-hover:translate-x-2 transition-transform duration-300">{link}</span>
                     </a>
-                  </li>
-                ))}
+                  </li>)}
               </ul>
             </div>
 
@@ -419,7 +371,7 @@ const Index = () => {
                   </div>
                   <div>
                     <p className="text-primary-foreground/60 text-xs">Call Us</p>
-                    <p className="text-primary-foreground font-medium">+91 XXX XXX XXXX</p>
+                    <p className="text-primary-foreground font-medium">+91 7909015069</p>
                   </div>
                 </div>
                 
@@ -449,11 +401,7 @@ const Index = () => {
                 <h5 className="text-primary-foreground font-semibold text-sm mb-2">Project Updates</h5>
                 <p className="text-primary-foreground/60 text-xs mb-3">Get the latest news about our projects</p>
                 <div className="flex space-x-2">
-                  <input
-                    type="email"
-                    placeholder="Your email"
-                    className="flex-1 px-3 py-2 text-xs bg-white/20 border border-white/30 rounded-lg text-primary-foreground placeholder-primary-foreground/50 focus:outline-none focus:ring-2 focus:ring-construction-orange focus:border-transparent"
-                  />
+                  <input type="email" placeholder="Your email" className="flex-1 px-3 py-2 text-xs bg-white/20 border border-white/30 rounded-lg text-primary-foreground placeholder-primary-foreground/50 focus:outline-none focus:ring-2 focus:ring-construction-orange focus:border-transparent" />
                   <Button variant="construction" size="sm" className="text-xs px-3">
                     Subscribe
                   </Button>
@@ -464,21 +412,27 @@ const Index = () => {
 
           {/* Stats Bar */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 animate-fade-in delay-500">
-            {[
-              { number: "500+", label: "Happy Clients", icon: Users },
-              { number: "1000+", label: "Projects Done", icon: Building },
-              { number: "24/7", label: "Support", icon: Clock },
-              { number: "15+", label: "Years Experience", icon: Award }
-            ].map((stat, index) => (
-              <div
-                key={index}
-                className="group text-center p-4 bg-primary-foreground/10 rounded-xl hover:bg-construction-orange/20 transition-all duration-300 hover:scale-105"
-              >
+            {[{
+            number: "500+",
+            label: "Happy Clients",
+            icon: Users
+          }, {
+            number: "1000+",
+            label: "Projects Done",
+            icon: Building
+          }, {
+            number: "24/7",
+            label: "Support",
+            icon: Clock
+          }, {
+            number: "15+",
+            label: "Years Experience",
+            icon: Award
+          }].map((stat, index) => <div key={index} className="group text-center p-4 bg-primary-foreground/10 rounded-xl hover:bg-construction-orange/20 transition-all duration-300 hover:scale-105">
                 <stat.icon className="h-6 w-6 text-construction-orange mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
                 <div className="text-2xl font-bold text-primary-foreground mb-1">{stat.number}</div>
                 <div className="text-primary-foreground/70 text-xs">{stat.label}</div>
-              </div>
-            ))}
+              </div>)}
           </div>
 
           {/* Bottom Section */}
@@ -496,16 +450,10 @@ const Index = () => {
               
               {/* Legal Links */}
               <div className="flex space-x-6 text-sm">
-                {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((link, index) => (
-                  <a
-                    key={index}
-                    href="#"
-                    className="text-primary-foreground/60 hover:text-construction-orange transition-colors duration-300 relative group"
-                  >
+                {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((link, index) => <a key={index} href="#" className="text-primary-foreground/60 hover:text-construction-orange transition-colors duration-300 relative group">
                     {link}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-construction-orange transition-all duration-300 group-hover:w-full"></span>
-                  </a>
-                ))}
+                  </a>)}
               </div>
             </div>
           </div>
@@ -522,8 +470,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
