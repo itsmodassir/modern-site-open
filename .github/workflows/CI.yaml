@@ -39,8 +39,11 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
+            sudo -i
+            whoami
+            pwd
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/modern-site-open
             sudo docker stop modern-site-open || true
             sudo docker rm modern-site-open || true
             sudo docker system prune -af || true
-            sudo docker run -itd --name modern-site -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/modern-site-open
+            sudo docker run -itd --name modern-site-open -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/modern-site-open
