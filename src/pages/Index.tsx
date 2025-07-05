@@ -448,13 +448,21 @@ const Index = () => {
                 </p>
               </div>
               
-              {/* Legal Links */}
-              <div className="flex space-x-6 text-sm">
-                {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((link, index) => <a key={index} href="#" className="text-primary-foreground/60 hover:text-construction-orange transition-colors duration-300 relative group">
-                    {link}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-construction-orange transition-all duration-300 group-hover:w-full"></span>
-                  </a>)}
-              </div>
+               {/* Legal Links */}
+               <div className="flex space-x-6 text-sm">
+                 <Link to="/privacy-policy" className="text-primary-foreground/60 hover:text-construction-orange transition-colors duration-300 relative group">
+                   Privacy Policy
+                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-construction-orange transition-all duration-300 group-hover:w-full"></span>
+                 </Link>
+                 <Link to="/terms-of-service" className="text-primary-foreground/60 hover:text-construction-orange transition-colors duration-300 relative group">
+                   Terms of Service
+                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-construction-orange transition-all duration-300 group-hover:w-full"></span>
+                 </Link>
+                 <Link to="/cookie-policy" className="text-primary-foreground/60 hover:text-construction-orange transition-colors duration-300 relative group">
+                   Cookie Policy
+                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-construction-orange transition-all duration-300 group-hover:w-full"></span>
+                 </Link>
+               </div>
             </div>
           </div>
 
