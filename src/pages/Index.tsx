@@ -413,11 +413,11 @@ const Index = () => {
           {/* Stats Bar */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 animate-fade-in delay-500">
             {[{
-            number: "500+",
+            number: "3+",
             label: "Happy Clients",
             icon: Users
           }, {
-            number: "1000+",
+            number: "3+",
             label: "Projects Done",
             icon: Building
           }, {
@@ -425,7 +425,7 @@ const Index = () => {
             label: "Support",
             icon: Clock
           }, {
-            number: "15+",
+            number: "1+",
             label: "Years Experience",
             icon: Award
           }].map((stat, index) => <div key={index} className="group text-center p-4 bg-primary-foreground/10 rounded-xl hover:bg-construction-orange/20 transition-all duration-300 hover:scale-105">
