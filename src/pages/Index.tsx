@@ -441,7 +441,7 @@ const Index = () => {
               {/* Copyright */}
               <div className="text-center md:text-left">
                 <p className="text-primary-foreground/60 text-sm">
-                  © 2024 Acronym Infrastructure Project. All rights reserved.
+                  © 2025 Acronym Infrastructure Project. All rights reserved.
                 </p>
                 <p className="text-construction-orange text-xs font-medium mt-1">
                   Led by Md Modassir | Building Tomorrow's Infrastructure
