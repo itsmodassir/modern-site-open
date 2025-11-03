@@ -91,13 +91,118 @@ export default function Bills() {
     }
   };
 
+  const generateBillPDF = (bill: any) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error("Please allow popups to generate bill");
+      return;
+    }
+
+    const billHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Bill ${bill.bill_number}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .header h1 { margin: 0; color: #333; }
+            .info-section { display: flex; justify-content: space-between; margin: 30px 0; }
+            .info-box { width: 48%; }
+            .info-box h3 { margin: 0 0 10px 0; color: #666; font-size: 14px; text-transform: uppercase; }
+            .info-box p { margin: 5px 0; }
+            table { width: 100%; border-collapse: collapse; margin: 30px 0; }
+            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+            th { background: #f5f5f5; font-weight: bold; }
+            .totals { margin-top: 20px; text-align: right; }
+            .totals table { width: 300px; margin-left: auto; }
+            .total-row { font-weight: bold; font-size: 18px; }
+            .footer { margin-top: 50px; text-align: center; color: #666; font-size: 12px; }
+            @media print { .no-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>INVOICE</h1>
+            <p>Bill Number: ${bill.bill_number}</p>
+          </div>
+          
+          <div class="info-section">
+            <div class="info-box">
+              <h3>Bill To:</h3>
+              <p><strong>${bill.client_name}</strong></p>
+              ${bill.client_email ? `<p>Email: ${bill.client_email}</p>` : ''}
+              ${bill.client_phone ? `<p>Phone: ${bill.client_phone}</p>` : ''}
+            </div>
+            <div class="info-box">
+              <h3>Bill Details:</h3>
+              <p>Date: ${new Date(bill.bill_date).toLocaleDateString()}</p>
+              ${bill.due_date ? `<p>Due Date: ${new Date(bill.due_date).toLocaleDateString()}</p>` : ''}
+              <p>Status: <strong>${bill.status.toUpperCase()}</strong></p>
+            </div>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th style="text-align: right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${bill.description}</td>
+                <td style="text-align: right;">₹${bill.amount.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="totals">
+            <table>
+              <tr>
+                <td>Subtotal:</td>
+                <td style="text-align: right;">₹${bill.amount.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>Tax:</td>
+                <td style="text-align: right;">₹${(bill.tax_amount || 0).toFixed(2)}</td>
+              </tr>
+              <tr class="total-row">
+                <td>Total:</td>
+                <td style="text-align: right;">₹${bill.total_amount.toFixed(2)}</td>
+              </tr>
+              ${bill.paid_amount > 0 ? `
+              <tr>
+                <td>Paid:</td>
+                <td style="text-align: right;">₹${bill.paid_amount.toFixed(2)}</td>
+              </tr>
+              <tr class="total-row">
+                <td>Balance Due:</td>
+                <td style="text-align: right;">₹${(bill.total_amount - bill.paid_amount).toFixed(2)}</td>
+              </tr>
+              ` : ''}
+            </table>
+          </div>
+          
+          <div class="footer">
+            <p>Thank you for your business!</p>
+            <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 30px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">Print Bill</button>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(billHTML);
+    printWindow.document.close();
+  };
+
   const markAsPaid = async (id: string) => {
     const bill = bills.find(b => b.id === id);
     if (!bill) return;
 
     const { error } = await supabase
       .from("bills")
-      .update({ 
+      .update({
         status: "paid",
         paid_amount: bill.total_amount
       })
@@ -265,7 +370,7 @@ export default function Bills() {
                           Mark Paid
                         </Button>
                       )}
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => generateBillPDF(bill)} title="Generate Bill">
                         <FileText className="h-4 w-4" />
                       </Button>
                     </div>
