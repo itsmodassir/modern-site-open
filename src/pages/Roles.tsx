@@ -21,6 +21,7 @@ export default function Roles() {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -89,6 +90,7 @@ export default function Roles() {
       setSelectedUserId("");
       setSelectedRole("");
       setDisplayName("");
+      setIsNewUser(false);
       fetchData();
     }
   };
@@ -148,13 +150,43 @@ export default function Roles() {
               </div>
               <div>
                 <Label>User ID</Label>
-                <Input 
-                  placeholder="Enter user ID" 
-                  value={selectedUserId}
-                  onChange={(e) => setSelectedUserId(e.target.value)}
-                />
+                <Select 
+                  value={isNewUser ? "new_user" : selectedUserId} 
+                  onValueChange={(value) => {
+                    if (value === "new_user") {
+                      setIsNewUser(true);
+                      setSelectedUserId("");
+                    } else {
+                      setIsNewUser(false);
+                      setSelectedUserId(value);
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map(user => {
+                      const userRole = getUserRoles(user.id)[0];
+                      return (
+                        <SelectItem key={user.id} value={user.id}>
+                          {userRole?.display_name || user.email} ({user.id.slice(0, 8)}...)
+                        </SelectItem>
+                      );
+                    })}
+                    <SelectItem value="new_user">+ Add New User</SelectItem>
+                  </SelectContent>
+                </Select>
+                {isNewUser && (
+                  <Input 
+                    className="mt-2"
+                    placeholder="Enter new user ID" 
+                    value={selectedUserId}
+                    onChange={(e) => setSelectedUserId(e.target.value)}
+                  />
+                )}
                 <p className="text-xs text-muted-foreground mt-1">
-                  Get user ID from authentication system
+                  Select existing user or add new one
                 </p>
               </div>
               <div>
