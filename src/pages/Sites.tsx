@@ -50,8 +50,12 @@ export default function Sites() {
     e.preventDefault();
     
     const { error } = await supabase.from("sites").insert([{
-      ...formData,
-      budget: formData.budget ? parseFloat(formData.budget) : null
+      name: formData.name,
+      location: formData.location,
+      budget: formData.budget ? parseFloat(formData.budget) : null,
+      start_date: formData.start_date || null,
+      end_date: formData.end_date || null,
+      status: formData.status
     }]);
 
     if (error) {
