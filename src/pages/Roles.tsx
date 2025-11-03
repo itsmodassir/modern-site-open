@@ -20,6 +20,7 @@ export default function Roles() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
+  const [displayName, setDisplayName] = useState("");
 
   useEffect(() => {
     checkAuth();
@@ -65,14 +66,15 @@ export default function Roles() {
   };
 
   const assignRole = async () => {
-    if (!selectedUserId || !selectedRole) {
-      toast.error("Please enter user ID and select role");
+    if (!selectedUserId || !selectedRole || !displayName) {
+      toast.error("Please fill all fields");
       return;
     }
 
     const { error } = await supabase.from("user_roles").insert([{
       user_id: selectedUserId,
-      role: selectedRole as "admin" | "manager" | "site_manager" | "cash_manager" | "fund_manager"
+      role: selectedRole as "admin" | "manager" | "site_manager" | "cash_manager" | "fund_manager",
+      display_name: displayName
     }]);
 
     if (error) {
@@ -86,6 +88,7 @@ export default function Roles() {
       setDialogOpen(false);
       setSelectedUserId("");
       setSelectedRole("");
+      setDisplayName("");
       fetchData();
     }
   };
@@ -133,6 +136,17 @@ export default function Roles() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
+                <Label>Display Name</Label>
+                <Input 
+                  placeholder="e.g., admin, manager1" 
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Memorable identifier for this user
+                </p>
+              </div>
+              <div>
                 <Label>User ID</Label>
                 <Input 
                   placeholder="Enter user ID" 
@@ -174,7 +188,7 @@ export default function Roles() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Email</TableHead>
+                <TableHead>User</TableHead>
                 <TableHead>Roles</TableHead>
                 <TableHead>Created At</TableHead>
                 <TableHead>Actions</TableHead>
@@ -183,9 +197,10 @@ export default function Roles() {
             <TableBody>
               {users.map((user) => {
                 const roles = getUserRoles(user.id);
+                const displayName = roles[0]?.display_name || user.email;
                 return (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.email}</TableCell>
+                    <TableCell className="font-medium">{displayName}</TableCell>
                     <TableCell>
                       <div className="flex gap-2 flex-wrap">
                         {roles.length > 0 ? (
