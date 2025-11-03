@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -43,20 +44,29 @@ export default function Roles() {
   };
 
   const fetchData = async () => {
-    const { data: { users: authUsers } } = await supabase.auth.admin.listUsers();
-    
+    // Get all user roles with their email from auth metadata
     const { data: rolesData } = await supabase
       .from("user_roles")
       .select("*");
 
-    if (authUsers) setUsers(authUsers);
+    // Get unique user IDs from roles
+    const userIds = [...new Set(rolesData?.map(r => r.user_id) || [])];
+    
+    // Create user objects from the roles data
+    const usersFromRoles = userIds.map(id => ({
+      id,
+      email: `User ${id.slice(0, 8)}...`, // Show partial ID
+      created_at: new Date().toISOString()
+    }));
+
+    setUsers(usersFromRoles);
     if (rolesData) setUserRoles(rolesData);
     setLoading(false);
   };
 
   const assignRole = async () => {
     if (!selectedUserId || !selectedRole) {
-      toast.error("Please select both user and role");
+      toast.error("Please enter user ID and select role");
       return;
     }
 
@@ -69,7 +79,7 @@ export default function Roles() {
       if (error.code === "23505") {
         toast.error("User already has this role");
       } else {
-        toast.error("Failed to assign role");
+        toast.error("Failed to assign role: " + error.message);
       }
     } else {
       toast.success("Role assigned successfully!");
@@ -123,19 +133,15 @@ export default function Roles() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Select User</Label>
-                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select user" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map(user => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>User ID</Label>
+                <Input 
+                  placeholder="Enter user ID" 
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Get user ID from authentication system
+                </p>
               </div>
               <div>
                 <Label>Select Role</Label>
