@@ -24,6 +24,7 @@ import Funds from "./pages/Funds";
 import Sites from "./pages/Sites";
 import WorkProgress from "./pages/WorkProgress";
 import Roles from "./pages/Roles";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/sites" element={<Sites />} />
           <Route path="/work-progress" element={<WorkProgress />} />
           <Route path="/roles" element={<Roles />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/services" element={<Services />} />
           <Route path="/about" element={<About />} />
           <Route path="/projects" element={<Projects />} />
