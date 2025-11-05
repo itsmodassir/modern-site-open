@@ -332,6 +332,60 @@ export type Database = {
           },
         ]
       }
+      projects: {
+        Row: {
+          area: string | null
+          budget: number | null
+          category: string | null
+          client: string | null
+          completion_date: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          location: string | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          area?: string | null
+          budget?: number | null
+          category?: string | null
+          client?: string | null
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          location?: string | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          area?: string | null
+          budget?: number | null
+          category?: string | null
+          client?: string | null
+          completion_date?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          location?: string | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       salary_payments: {
         Row: {
           absent_days: number | null

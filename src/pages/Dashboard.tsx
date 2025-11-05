@@ -200,6 +200,22 @@ export default function Dashboard() {
             </Card>
           )}
 
+          {/* Project Management */}
+          {(isAdmin || isManager) && (
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/project-management")}>
+              <CardHeader>
+                <Briefcase className="h-10 w-10 mb-2 text-primary" />
+                <CardTitle>Project Showcase</CardTitle>
+                <CardDescription>Manage public projects</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Add and manage projects shown on website
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Work Progress */}
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/work-progress")}>
             <CardHeader>

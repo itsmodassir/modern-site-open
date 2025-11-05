@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,100 +16,53 @@ import {
   Eye
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface Project {
+  id: string;
+  title: string;
+  description: string | null;
+  client: string | null;
+  location: string | null;
+  category: string | null;
+  status: string;
+  start_date: string | null;
+  completion_date: string | null;
+  budget: number | null;
+  area: string | null;
+  image_url: string | null;
+  is_featured: boolean;
+}
 
 const Projects = () => {
-  const featuredProjects = [
-    {
-      id: 1,
-      title: "Mumbai-Pune Highway Expansion",
-      category: "Highway Construction",
-      location: "Maharashtra, India",
-      duration: "24 Months",
-      budget: "₹150 Crores",
-      status: "Completed",
-      year: "2023",
-      description: "Major highway expansion project including 6-lane development, modern toll systems, and safety infrastructure.",
-      highlights: ["150km highway", "Advanced toll systems", "Emergency lanes", "Smart traffic management"],
-      image: "/api/placeholder/600/400"
-    },
-    {
-      id: 2,
-      title: "Smart City Infrastructure - Bhopal",
-      category: "Urban Development",
-      location: "Bhopal, Madhya Pradesh",
-      duration: "18 Months", 
-      budget: "₹200 Crores",
-      status: "In Progress",
-      year: "2024",
-      description: "Comprehensive smart city infrastructure including roads, utilities, and digital connectivity systems.",
-      highlights: ["Smart traffic lights", "Underground utilities", "IoT integration", "Sustainable design"],
-      image: "/api/placeholder/600/400"
-    },
-    {
-      id: 3,
-      title: "Industrial Park Development",
-      category: "Commercial Infrastructure",
-      location: "Gujarat, India",
-      duration: "12 Months",
-      budget: "₹75 Crores",
-      status: "Completed",
-      year: "2023",
-      description: "Complete infrastructure development for industrial park including roads, utilities, and facilities.",
-      highlights: ["Internal road network", "Utility infrastructure", "Waste management", "Green spaces"],
-      image: "/api/placeholder/600/400"
-    }
-  ];
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allProjects = [
-    {
-      title: "Ring Road Construction - Indore",
-      category: "Road Construction",
-      location: "Indore, MP",
-      year: "2023",
-      status: "Completed",
-      budget: "₹80 Cr"
-    },
-    {
-      title: "Metro Station Infrastructure",
-      category: "Public Transport",
-      location: "Delhi NCR",
-      year: "2022",
-      status: "Completed", 
-      budget: "₹45 Cr"
-    },
-    {
-      title: "Airport Access Road",
-      category: "Transportation",
-      location: "Bangalore",
-      year: "2024",
-      status: "In Progress",
-      budget: "₹120 Cr"
-    },
-    {
-      title: "IT Park Infrastructure",
-      category: "Commercial",
-      location: "Hyderabad",
-      year: "2023",
-      status: "Completed",
-      budget: "₹90 Cr"
-    },
-    {
-      title: "Residential Township Roads",
-      category: "Residential",
-      location: "Pune",
-      year: "2024",
-      status: "Planning",
-      budget: "₹35 Cr"
-    },
-    {
-      title: "Bridge Construction Project",
-      category: "Bridge Infrastructure",
-      location: "Chennai",
-      year: "2022",
-      status: "Completed",
-      budget: "₹60 Cr"
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setProjects(data || []);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      toast.error("Failed to load projects");
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const featuredProjects = projects.filter(p => p.is_featured);
+  const recentProjects = projects.filter(p => !p.is_featured).slice(0, 6);
 
   const projectStats = [
     { number: "1000+", label: "Projects Completed", icon: Building },
@@ -117,18 +71,42 @@ const Projects = () => {
     { number: "50+", label: "Team Members", icon: Users }
   ];
 
+  const formatBudget = (budget: number | null) => {
+    if (!budget) return "N/A";
+    if (budget >= 10000000) return `₹${(budget / 10000000).toFixed(0)} Cr`;
+    if (budget >= 100000) return `₹${(budget / 100000).toFixed(0)} L`;
+    return `₹${budget.toLocaleString()}`;
+  };
+
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return "N/A";
+    return new Date(dateStr).getFullYear().toString();
+  };
+
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Completed":
+    switch (status.toLowerCase()) {
+      case "completed":
         return "bg-green-100 text-green-800 border-green-200";
-      case "In Progress":
+      case "active":
+      case "in progress":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "Planning":
+      case "planning":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-lg">Loading projects...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,84 +162,82 @@ const Projects = () => {
           </div>
 
           <div className="space-y-12">
-            {featuredProjects.map((project, index) => (
-              <Card key={project.id} className="shadow-elegant hover:shadow-construction transition-all duration-300">
-                <div className={`grid lg:grid-cols-2 gap-8 ${index % 2 === 1 ? 'lg:grid-flow-col-dense' : ''}`}>
-                  
-                  {/* Project Image */}
-                  <div className={`${index % 2 === 1 ? 'lg:col-start-2' : ''} relative`}>
-                    <div className="aspect-video bg-gradient-construction rounded-xl flex items-center justify-center text-primary-foreground">
-                      <div className="text-center">
-                        <Building className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                        <p className="text-lg font-semibold">{project.title}</p>
-                        <p className="text-sm opacity-75">{project.category}</p>
-                      </div>
-                    </div>
-                    <Badge 
-                      className={`absolute top-4 right-4 ${getStatusColor(project.status)}`}
-                    >
-                      {project.status}
-                    </Badge>
-                  </div>
-
-                  {/* Project Details */}
-                  <div className={`${index % 2 === 1 ? 'lg:col-start-1' : ''}`}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="outline" className="text-construction-orange border-construction-orange">
-                          {project.category}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">{project.year}</span>
-                      </div>
-                      <CardTitle className="text-2xl lg:text-3xl">{project.title}</CardTitle>
-                      <CardDescription className="text-base">
-                        {project.description}
-                      </CardDescription>
-                    </CardHeader>
+            {featuredProjects.length === 0 ? (
+              <div className="text-center py-20">
+                <Building className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <p className="text-lg text-muted-foreground">No featured projects available yet.</p>
+              </div>
+            ) : (
+              featuredProjects.map((project, index) => (
+                <Card key={project.id} className="shadow-elegant hover:shadow-construction transition-all duration-300">
+                  <div className={`grid lg:grid-cols-2 gap-8 ${index % 2 === 1 ? 'lg:grid-flow-col-dense' : ''}`}>
                     
-                    <CardContent>
-                      {/* Project Info Grid */}
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4 text-construction-orange" />
-                          <span className="text-sm">{project.location}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4 text-construction-orange" />
-                          <span className="text-sm">{project.duration}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <DollarSign className="h-4 w-4 text-construction-orange" />
-                          <span className="text-sm">{project.budget}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Award className="h-4 w-4 text-construction-orange" />
-                          <span className="text-sm">Quality Certified</span>
+                    {/* Project Image */}
+                    <div className={`${index % 2 === 1 ? 'lg:col-start-2' : ''} relative`}>
+                      <div className="aspect-video bg-gradient-construction rounded-xl flex items-center justify-center text-primary-foreground">
+                        <div className="text-center">
+                          <Building className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg font-semibold">{project.title}</p>
+                          <p className="text-sm opacity-75">{project.category}</p>
                         </div>
                       </div>
+                      <Badge 
+                        className={`absolute top-4 right-4 ${getStatusColor(project.status)}`}
+                      >
+                        {project.status}
+                      </Badge>
+                    </div>
 
-                      {/* Project Highlights */}
-                      <div className="mb-6">
-                        <h4 className="font-semibold mb-3">Project Highlights:</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                          {project.highlights.map((highlight, idx) => (
-                            <div key={idx} className="flex items-center text-sm">
-                              <div className="w-2 h-2 bg-construction-orange rounded-full mr-2"></div>
-                              {highlight}
+                    {/* Project Details */}
+                    <div className={`${index % 2 === 1 ? 'lg:col-start-1' : ''}`}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="outline" className="text-construction-orange border-construction-orange">
+                            {project.category || "Infrastructure"}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">{formatDate(project.start_date)}</span>
+                        </div>
+                        <CardTitle className="text-2xl lg:text-3xl">{project.title}</CardTitle>
+                        <CardDescription className="text-base">
+                          {project.description || "Premium infrastructure project"}
+                        </CardDescription>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        {/* Project Info Grid */}
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="h-4 w-4 text-construction-orange" />
+                            <span className="text-sm">{project.location || "India"}</span>
+                          </div>
+                          {project.client && (
+                            <div className="flex items-center space-x-2">
+                              <Users className="h-4 w-4 text-construction-orange" />
+                              <span className="text-sm">{project.client}</span>
                             </div>
-                          ))}
+                          )}
+                          <div className="flex items-center space-x-2">
+                            <DollarSign className="h-4 w-4 text-construction-orange" />
+                            <span className="text-sm">{formatBudget(project.budget)}</span>
+                          </div>
+                          {project.area && (
+                            <div className="flex items-center space-x-2">
+                              <Award className="h-4 w-4 text-construction-orange" />
+                              <span className="text-sm">{project.area}</span>
+                            </div>
+                          )}
                         </div>
-                      </div>
 
-                      <Button variant="construction" className="w-full sm:w-auto">
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Project Details
-                      </Button>
-                    </CardContent>
+                        <Button variant="construction" className="w-full sm:w-auto">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Project Details
+                        </Button>
+                      </CardContent>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -279,42 +255,49 @@ const Projects = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {allProjects.map((project, index) => (
-              <Card key={index} className="hover:shadow-elegant transition-all duration-300 hover:-translate-y-2 bg-card/80 backdrop-blur">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className="text-construction-orange border-construction-orange text-xs">
-                      {project.category}
-                    </Badge>
-                    <Badge className={`text-xs ${getStatusColor(project.status)}`}>
-                      {project.status}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-lg">{project.title}</CardTitle>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center text-sm">
-                      <MapPin className="h-4 w-4 text-construction-orange mr-2" />
-                      {project.location}
+            {recentProjects.length === 0 ? (
+              <div className="col-span-full text-center py-20">
+                <Building className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <p className="text-lg text-muted-foreground">No projects available yet.</p>
+              </div>
+            ) : (
+              recentProjects.map((project) => (
+                <Card key={project.id} className="hover:shadow-elegant transition-all duration-300 hover:-translate-y-2 bg-card/80 backdrop-blur">
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="outline" className="text-construction-orange border-construction-orange text-xs">
+                        {project.category || "Infrastructure"}
+                      </Badge>
+                      <Badge className={`text-xs ${getStatusColor(project.status)}`}>
+                        {project.status}
+                      </Badge>
                     </div>
-                    <div className="flex items-center text-sm">
-                      <Calendar className="h-4 w-4 text-construction-orange mr-2" />
-                      {project.year}
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <DollarSign className="h-4 w-4 text-construction-orange mr-2" />
-                      {project.budget}
-                    </div>
-                  </div>
+                    <CardTitle className="text-lg">{project.title}</CardTitle>
+                  </CardHeader>
                   
-                  <Button variant="outline" size="sm" className="w-full mt-4 hover:bg-construction-orange hover:text-white">
-                    View Details
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center text-sm">
+                        <MapPin className="h-4 w-4 text-construction-orange mr-2" />
+                        {project.location || "India"}
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <Calendar className="h-4 w-4 text-construction-orange mr-2" />
+                        {formatDate(project.start_date)}
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <DollarSign className="h-4 w-4 text-construction-orange mr-2" />
+                        {formatBudget(project.budget)}
+                      </div>
+                    </div>
+                    
+                    <Button variant="outline" size="sm" className="w-full mt-4 hover:bg-construction-orange hover:text-white">
+                      View Details
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </section>

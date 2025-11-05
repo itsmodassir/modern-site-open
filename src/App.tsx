@@ -22,6 +22,7 @@ import Expenses from "./pages/Expenses";
 import Bills from "./pages/Bills";
 import Funds from "./pages/Funds";
 import Sites from "./pages/Sites";
+import ProjectManagement from "./pages/ProjectManagement";
 import WorkProgress from "./pages/WorkProgress";
 import Roles from "./pages/Roles";
 import Settings from "./pages/Settings";
@@ -44,7 +45,8 @@ const App = () => (
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/bills" element={<Bills />} />
           <Route path="/funds" element={<Funds />} />
-          <Route path="/sites" element={<Sites />} />
+            <Route path="/sites" element={<Sites />} />
+            <Route path="/project-management" element={<ProjectManagement />} />
           <Route path="/work-progress" element={<WorkProgress />} />
           <Route path="/roles" element={<Roles />} />
           <Route path="/settings" element={<Settings />} />
