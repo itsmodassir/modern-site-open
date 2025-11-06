@@ -22,6 +22,12 @@ export default function Bills() {
     company_name: "",
     company_address: "",
     company_gstin: "",
+    company_phone: "",
+    company_email: "",
+    bank_name: "",
+    account_number: "",
+    ifsc_code: "",
+    upi_id: "",
     client_name: "",
     client_email: "",
     client_phone: "",
@@ -94,6 +100,12 @@ export default function Bills() {
       company_name: formData.company_name,
       company_address: formData.company_address,
       company_gstin: formData.company_gstin,
+      company_phone: formData.company_phone,
+      company_email: formData.company_email,
+      bank_name: formData.bank_name,
+      account_number: formData.account_number,
+      ifsc_code: formData.ifsc_code,
+      upi_id: formData.upi_id,
       client_address: formData.client_address,
       client_gstin: formData.client_gstin,
       gst_enabled: formData.gst_enabled,
@@ -121,6 +133,12 @@ export default function Bills() {
         company_name: "",
         company_address: "",
         company_gstin: "",
+        company_phone: "",
+        company_email: "",
+        bank_name: "",
+        account_number: "",
+        ifsc_code: "",
+        upi_id: "",
         client_name: "",
         client_email: "",
         client_phone: "",
@@ -228,7 +246,9 @@ export default function Bills() {
             <div class="company-header">
               <h1>${metadata.company_name || 'YOUR COMPANY NAME'}</h1>
               <div class="company-details">
-                ${metadata.company_address || 'Company Address Line 1, City, State - PIN'}
+                ${metadata.company_address || 'Company Address Line 1, City, State - PIN'}<br>
+                ${metadata.company_phone ? `📞 ${metadata.company_phone}` : ''} 
+                ${metadata.company_email ? `✉ ${metadata.company_email}` : ''}
               </div>
               ${isGSTBill ? `<div class="gstin">GSTIN: ${metadata.company_gstin || 'XXXXXXXXXXXX'}</div>` : ''}
             </div>
@@ -333,6 +353,41 @@ export default function Bills() {
             <div class="amount-words">
               <strong>Amount in Words:</strong> <span id="amountInWords"></span> Rupees Only
             </div>
+            
+            <!-- Payment Details Section -->
+            ${(metadata.bank_name || metadata.account_number || metadata.ifsc_code || metadata.upi_id) ? `
+            <div style="margin: 25px 0; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
+              <h3 style="font-size: 16px; margin-bottom: 12px; text-align: center; font-weight: bold; letter-spacing: 1px;">💳 PAYMENT DETAILS</h3>
+              <div style="background: rgba(255,255,255,0.95); padding: 15px; border-radius: 6px; color: #333;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  ${metadata.bank_name ? `
+                  <div>
+                    <div style="font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 3px;">Bank Name</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #000;">${metadata.bank_name}</div>
+                  </div>
+                  ` : ''}
+                  ${metadata.account_number ? `
+                  <div>
+                    <div style="font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 3px;">Account Number</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #000; letter-spacing: 1px;">${metadata.account_number}</div>
+                  </div>
+                  ` : ''}
+                  ${metadata.ifsc_code ? `
+                  <div>
+                    <div style="font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 3px;">IFSC Code</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #000;">${metadata.ifsc_code}</div>
+                  </div>
+                  ` : ''}
+                  ${metadata.upi_id ? `
+                  <div>
+                    <div style="font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 3px;">UPI ID</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #000;">${metadata.upi_id}</div>
+                  </div>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+            ` : ''}
             
             <!-- Footer -->
             <div class="footer">
@@ -472,6 +527,69 @@ export default function Bills() {
                       required
                       placeholder="Full company address"
                       rows={2}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="company_phone">Company Phone</Label>
+                    <Input
+                      id="company_phone"
+                      value={formData.company_phone}
+                      onChange={(e) => setFormData({ ...formData, company_phone: e.target.value })}
+                      placeholder="+91 00000 00000"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="company_email">Company Email</Label>
+                    <Input
+                      id="company_email"
+                      type="email"
+                      value={formData.company_email}
+                      onChange={(e) => setFormData({ ...formData, company_email: e.target.value })}
+                      placeholder="contact@company.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Account Details Section */}
+              <div className="border-b pb-4">
+                <h3 className="font-semibold mb-3">💳 Payment Account Details</h3>
+                <p className="text-sm text-muted-foreground mb-3">Add your payment details to display on the bill</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="bank_name">Bank Name</Label>
+                    <Input
+                      id="bank_name"
+                      value={formData.bank_name}
+                      onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                      placeholder="e.g., State Bank of India"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="account_number">Account Number</Label>
+                    <Input
+                      id="account_number"
+                      value={formData.account_number}
+                      onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
+                      placeholder="1234567890"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="ifsc_code">IFSC Code</Label>
+                    <Input
+                      id="ifsc_code"
+                      value={formData.ifsc_code}
+                      onChange={(e) => setFormData({ ...formData, ifsc_code: e.target.value.toUpperCase() })}
+                      placeholder="SBIN0001234"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="upi_id">UPI ID</Label>
+                    <Input
+                      id="upi_id"
+                      value={formData.upi_id}
+                      onChange={(e) => setFormData({ ...formData, upi_id: e.target.value })}
+                      placeholder="example@upi"
                     />
                   </div>
                 </div>
