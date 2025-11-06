@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, FileText, Save, BookmarkPlus } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Save, BookmarkPlus, Star } from "lucide-react";
 
 export default function Bills() {
   const navigate = useNavigate();
@@ -85,6 +85,16 @@ export default function Bills() {
     fetchTemplates();
   }, []);
 
+  useEffect(() => {
+    // Auto-load default company profile when dialog opens
+    if (dialogOpen && companyProfiles.length > 0) {
+      const defaultProfile = companyProfiles.find(p => p.is_default);
+      if (defaultProfile) {
+        loadCompanyProfile(defaultProfile.id);
+      }
+    }
+  }, [dialogOpen]);
+
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) navigate("/auth");
@@ -115,8 +125,17 @@ export default function Bills() {
     if (servicesRes.data) setServiceItems(servicesRes.data);
   };
 
-  const saveCompanyTemplate = async () => {
+  const saveCompanyTemplate = async (setAsDefault = false) => {
     const { data: { session } } = await supabase.auth.getSession();
+    
+    // If setting as default, unset all other defaults first
+    if (setAsDefault) {
+      await supabase
+        .from("company_profiles")
+        .update({ is_default: false })
+        .eq("created_by", session?.user.id);
+    }
+
     const { error } = await supabase.from("company_profiles").insert({
       name: formData.company_name,
       address: formData.company_address,
@@ -127,14 +146,41 @@ export default function Bills() {
       account_number: formData.account_number || null,
       ifsc_code: formData.ifsc_code || null,
       upi_id: formData.upi_id || null,
+      is_default: setAsDefault,
       created_by: session?.user.id
     });
 
     if (error) toast.error("Failed to save company template");
     else {
-      toast.success("Company template saved!");
+      toast.success(setAsDefault ? "Default company profile saved!" : "Company template saved!");
       fetchTemplates();
       setSaveTemplateDialogOpen(false);
+    }
+  };
+
+  const toggleDefaultProfile = async (profileId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const profile = companyProfiles.find(p => p.id === profileId);
+    
+    if (!profile) return;
+
+    // If setting as default, unset all others first
+    if (!profile.is_default) {
+      await supabase
+        .from("company_profiles")
+        .update({ is_default: false })
+        .eq("created_by", session?.user.id);
+    }
+
+    const { error } = await supabase
+      .from("company_profiles")
+      .update({ is_default: !profile.is_default })
+      .eq("id", profileId);
+
+    if (error) toast.error("Failed to update default profile");
+    else {
+      toast.success(profile.is_default ? "Removed as default" : "Set as default profile");
+      fetchTemplates();
     }
   };
 
@@ -653,13 +699,18 @@ export default function Bills() {
                   <div className="flex gap-2">
                     {companyProfiles.length > 0 && (
                       <Select onValueChange={loadCompanyProfile}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[200px]">
                           <SelectValue placeholder="Load saved..." />
                         </SelectTrigger>
                         <SelectContent>
                           {companyProfiles.map((profile) => (
                             <SelectItem key={profile.id} value={profile.id}>
-                              {profile.name}
+                              <div className="flex items-center justify-between w-full">
+                                <span>{profile.name}</span>
+                                {profile.is_default && (
+                                  <Star className="h-3 w-3 fill-yellow-500 text-yellow-500 ml-2" />
+                                )}
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1055,7 +1106,13 @@ export default function Bills() {
                 <Button variant="outline" onClick={() => setSaveTemplateDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={templateType === 'company' ? saveCompanyTemplate : saveClientTemplate}>
+                {templateType === 'company' && (
+                  <Button variant="outline" onClick={() => saveCompanyTemplate(true)}>
+                    <Star className="h-4 w-4 mr-1" />
+                    Save as Default
+                  </Button>
+                )}
+                <Button onClick={() => templateType === 'company' ? saveCompanyTemplate(false) : saveClientTemplate()}>
                   Save Template
                 </Button>
               </div>
