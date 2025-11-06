@@ -33,22 +33,42 @@ export default function Bills() {
     client_phone: "",
     client_address: "",
     client_gstin: "",
-    description: "",
-    amount: "",
+    items: [{ description: "", amount: "" }],
     gst_enabled: false,
     gst_rate: "18",
     bill_date: new Date().toISOString().split('T')[0],
     due_date: ""
   });
 
+  const calculateTotalAmount = () => {
+    return formData.items.reduce((sum, item) => sum + parseFloat(item.amount || "0"), 0);
+  };
+
   const calculateGST = () => {
     if (!formData.gst_enabled) return { cgst: 0, sgst: 0, total: 0 };
-    const amount = parseFloat(formData.amount || "0");
+    const amount = calculateTotalAmount();
     const rate = parseFloat(formData.gst_rate || "18");
     const gstTotal = (amount * rate) / 100;
     const cgst = gstTotal / 2;
     const sgst = gstTotal / 2;
     return { cgst, sgst, total: gstTotal };
+  };
+
+  const addItem = () => {
+    setFormData({ ...formData, items: [...formData.items, { description: "", amount: "" }] });
+  };
+
+  const removeItem = (index: number) => {
+    if (formData.items.length > 1) {
+      const newItems = formData.items.filter((_, i) => i !== index);
+      setFormData({ ...formData, items: newItems });
+    }
+  };
+
+  const updateItem = (index: number, field: "description" | "amount", value: string) => {
+    const newItems = [...formData.items];
+    newItems[index][field] = value;
+    setFormData({ ...formData, items: newItems });
   };
 
   useEffect(() => {
@@ -75,7 +95,7 @@ export default function Bills() {
     e.preventDefault();
     
     const { data: { session } } = await supabase.auth.getSession();
-    const amount = parseFloat(formData.amount);
+    const amount = calculateTotalAmount();
     const gst = calculateGST();
     const totalAmount = amount + gst.total;
 
@@ -84,7 +104,7 @@ export default function Bills() {
       client_name: formData.client_name,
       client_email: formData.client_email || null,
       client_phone: formData.client_phone || null,
-      description: formData.description,
+      description: formData.items.map(item => item.description).join("; "),
       amount: amount,
       tax_amount: gst.total,
       total_amount: totalAmount,
@@ -111,7 +131,8 @@ export default function Bills() {
       gst_enabled: formData.gst_enabled,
       gst_rate: formData.gst_rate,
       cgst: gst.cgst,
-      sgst: gst.sgst
+      sgst: gst.sgst,
+      items: formData.items
     };
 
     const { data: insertedBill, error } = await supabase
@@ -144,8 +165,7 @@ export default function Bills() {
         client_phone: "",
         client_address: "",
         client_gstin: "",
-        description: "",
-        amount: "",
+        items: [{ description: "", amount: "" }],
         gst_enabled: false,
         gst_rate: "18",
         bill_date: new Date().toISOString().split('T')[0],
@@ -287,11 +307,19 @@ export default function Bills() {
                 </tr>
               </thead>
               <tbody>
+                ${metadata.items?.map((item: any, index: number) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${item.description}</td>
+                  <td style="text-align: right;">₹${parseFloat(item.amount).toFixed(2)}</td>
+                </tr>
+                `).join('') || `
                 <tr>
                   <td>1</td>
                   <td>${bill.description}</td>
                   <td style="text-align: right;">₹${bill.amount.toFixed(2)}</td>
                 </tr>
+                `}
               </tbody>
             </table>
             
@@ -692,30 +720,59 @@ export default function Bills() {
 
               {/* Bill Details Section */}
               <div className="border-b pb-4">
-                <h3 className="font-semibold mb-3">Bill Details</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <Label htmlFor="description">Description*</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      required
-                      placeholder="Describe the goods/services"
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="amount">Base Amount*</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      step="0.01"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      required
-                    />
-                  </div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">Bill Items (Goods/Services)</h3>
+                  <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Item
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {formData.items.map((item, index) => (
+                    <div key={index} className="grid grid-cols-12 gap-3 items-start p-3 bg-muted/50 rounded-lg">
+                      <div className="col-span-1 flex items-center justify-center pt-2">
+                        <span className="font-semibold text-muted-foreground">{index + 1}.</span>
+                      </div>
+                      <div className="col-span-7">
+                        <Label htmlFor={`description-${index}`}>Description*</Label>
+                        <Textarea
+                          id={`description-${index}`}
+                          value={item.description}
+                          onChange={(e) => updateItem(index, "description", e.target.value)}
+                          required
+                          placeholder="Describe the goods/services"
+                          rows={2}
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <Label htmlFor={`amount-${index}`}>Amount (₹)*</Label>
+                        <Input
+                          id={`amount-${index}`}
+                          type="number"
+                          step="0.01"
+                          value={item.amount}
+                          onChange={(e) => updateItem(index, "amount", e.target.value)}
+                          required
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div className="col-span-1 flex items-end justify-center pb-2">
+                        {formData.items.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeItem(index)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <ArrowLeft className="h-4 w-4 rotate-180" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <Label htmlFor="bill_date">Bill Date*</Label>
                     <Input
@@ -741,8 +798,8 @@ export default function Bills() {
               {/* Calculation Summary */}
               <div className="bg-primary/5 p-4 rounded-lg space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Base Amount:</span>
-                  <span className="font-semibold">₹{parseFloat(formData.amount || "0").toFixed(2)}</span>
+                  <span>Subtotal ({formData.items.length} item{formData.items.length > 1 ? 's' : ''}):</span>
+                  <span className="font-semibold">₹{calculateTotalAmount().toFixed(2)}</span>
                 </div>
                 {formData.gst_enabled && (
                   <>
@@ -762,7 +819,7 @@ export default function Bills() {
                 )}
                 <div className="flex justify-between text-lg font-bold border-t-2 pt-2">
                   <span>Total Amount:</span>
-                  <span>₹{(parseFloat(formData.amount || "0") + calculateGST().total).toFixed(2)}</span>
+                  <span>₹{(calculateTotalAmount() + calculateGST().total).toFixed(2)}</span>
                 </div>
               </div>
 
