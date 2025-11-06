@@ -42,8 +42,10 @@ export default function Bills() {
     client_address: "",
     client_gstin: "",
     items: [{ description: "", amount: "" }],
-    gst_enabled: false,
-    gst_rate: "18",
+    tax_enabled: false,
+    tax_type: "GST",
+    tax_rate: "18",
+    custom_tax_name: "",
     bill_date: new Date().toISOString().split('T')[0],
     due_date: ""
   });
@@ -52,14 +54,38 @@ export default function Bills() {
     return formData.items.reduce((sum, item) => sum + parseFloat(item.amount || "0"), 0);
   };
 
-  const calculateGST = () => {
-    if (!formData.gst_enabled) return { cgst: 0, sgst: 0, total: 0 };
+  const calculateTax = () => {
+    if (!formData.tax_enabled) return { tax1: 0, tax2: 0, total: 0, tax1Label: "", tax2Label: "" };
+    
     const amount = calculateTotalAmount();
-    const rate = parseFloat(formData.gst_rate || "18");
-    const gstTotal = (amount * rate) / 100;
-    const cgst = gstTotal / 2;
-    const sgst = gstTotal / 2;
-    return { cgst, sgst, total: gstTotal };
+    const rate = parseFloat(formData.tax_rate || "18");
+    const taxTotal = (amount * rate) / 100;
+    
+    // For GST, split into CGST and SGST
+    if (formData.tax_type === "GST") {
+      const cgst = taxTotal / 2;
+      const sgst = taxTotal / 2;
+      return { 
+        tax1: cgst, 
+        tax2: sgst, 
+        total: taxTotal,
+        tax1Label: `CGST (${(rate / 2).toFixed(2)}%)`,
+        tax2Label: `SGST (${(rate / 2).toFixed(2)}%)`
+      };
+    }
+    
+    // For other tax types, show as single tax
+    const taxLabel = formData.tax_type === "Custom" 
+      ? formData.custom_tax_name || "Tax"
+      : formData.tax_type;
+    
+    return { 
+      tax1: taxTotal, 
+      tax2: 0, 
+      total: taxTotal,
+      tax1Label: `${taxLabel} (${rate}%)`,
+      tax2Label: ""
+    };
   };
 
   const addItem = () => {
@@ -256,8 +282,8 @@ export default function Bills() {
     
     const { data: { session } } = await supabase.auth.getSession();
     const amount = calculateTotalAmount();
-    const gst = calculateGST();
-    const totalAmount = amount + gst.total;
+    const tax = calculateTax();
+    const totalAmount = amount + tax.total;
 
     const billData = {
       bill_number: "",
@@ -266,7 +292,7 @@ export default function Bills() {
       client_phone: formData.client_phone || null,
       description: formData.items.map(item => item.description).join("; "),
       amount: amount,
-      tax_amount: gst.total,
+      tax_amount: tax.total,
       total_amount: totalAmount,
       bill_date: formData.bill_date,
       due_date: formData.due_date || null,
@@ -288,10 +314,14 @@ export default function Bills() {
       upi_id: formData.upi_id,
       client_address: formData.client_address,
       client_gstin: formData.client_gstin,
-      gst_enabled: formData.gst_enabled,
-      gst_rate: formData.gst_rate,
-      cgst: gst.cgst,
-      sgst: gst.sgst,
+      tax_enabled: formData.tax_enabled,
+      tax_type: formData.tax_type,
+      tax_rate: formData.tax_rate,
+      custom_tax_name: formData.custom_tax_name,
+      tax1: tax.tax1,
+      tax2: tax.tax2,
+      tax1Label: tax.tax1Label,
+      tax2Label: tax.tax2Label,
       items: formData.items
     };
 
@@ -326,8 +356,10 @@ export default function Bills() {
         client_address: "",
         client_gstin: "",
         items: [{ description: "", amount: "" }],
-        gst_enabled: false,
-        gst_rate: "18",
+        tax_enabled: false,
+        tax_type: "GST",
+        tax_rate: "18",
+        custom_tax_name: "",
         bill_date: new Date().toISOString().split('T')[0],
         due_date: ""
       });
@@ -343,7 +375,9 @@ export default function Bills() {
 
     // Retrieve bill metadata
     const metadata = JSON.parse(localStorage.getItem(`bill_metadata_${bill.id}`) || '{}');
-    const isGSTBill = metadata.gst_enabled;
+    const hasTax = metadata.tax_enabled;
+    const taxType = metadata.tax_type || "GST";
+    const isGST = taxType === "GST";
 
     const billHTML = `
       <!DOCTYPE html>
@@ -430,12 +464,12 @@ export default function Bills() {
                 ${metadata.company_phone ? `📞 ${metadata.company_phone}` : ''} 
                 ${metadata.company_email ? `✉ ${metadata.company_email}` : ''}
               </div>
-              ${isGSTBill ? `<div class="gstin">GSTIN: ${metadata.company_gstin || 'XXXXXXXXXXXX'}</div>` : ''}
+              ${(hasTax && isGST) ? `<div class="gstin">GSTIN: ${metadata.company_gstin || 'XXXXXXXXXXXX'}</div>` : ''}
             </div>
             
             <!-- Invoice Type -->
             <div class="invoice-type">
-              ${isGSTBill ? 'TAX INVOICE (GST)' : 'INVOICE (NON-GST)'}
+              ${hasTax ? `TAX INVOICE (${taxType === 'Custom' ? metadata.custom_tax_name || 'TAX' : taxType})` : 'INVOICE (NON-TAX)'}
             </div>
             
             <!-- Bill Information -->
@@ -446,7 +480,7 @@ export default function Bills() {
                 ${metadata.client_address ? `<p>${metadata.client_address}</p>` : ''}
                 ${bill.client_email ? `<p>Email: ${bill.client_email}</p>` : ''}
                 ${bill.client_phone ? `<p>Phone: ${bill.client_phone}</p>` : ''}
-                ${isGSTBill && metadata.client_gstin ? `<p><strong>GSTIN:</strong> ${metadata.client_gstin}</p>` : ''}
+                ${(hasTax && isGST && metadata.client_gstin) ? `<p><strong>GSTIN:</strong> ${metadata.client_gstin}</p>` : ''}
               </div>
               <div class="bill-info-box">
                 <h3>Invoice Details:</h3>
@@ -483,23 +517,23 @@ export default function Bills() {
               </tbody>
             </table>
             
-            ${isGSTBill ? `
+            ${hasTax && isGST ? `
             <!-- GST Breakdown -->
             <div class="tax-summary">
               <table>
                 <thead>
                   <tr>
                     <th>Taxable Amount</th>
-                    <th style="text-align: center;">CGST (${(parseFloat(metadata.gst_rate) / 2)}%)</th>
-                    <th style="text-align: center;">SGST (${(parseFloat(metadata.gst_rate) / 2)}%)</th>
+                    <th style="text-align: center;">CGST (${(parseFloat(metadata.tax_rate) / 2)}%)</th>
+                    <th style="text-align: center;">SGST (${(parseFloat(metadata.tax_rate) / 2)}%)</th>
                     <th style="text-align: right;">Total Tax</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td style="text-align: left;">₹${bill.amount.toFixed(2)}</td>
-                    <td>₹${metadata.cgst?.toFixed(2) || '0.00'}</td>
-                    <td>₹${metadata.sgst?.toFixed(2) || '0.00'}</td>
+                    <td>₹${metadata.tax1?.toFixed(2) || '0.00'}</td>
+                    <td>₹${metadata.tax2?.toFixed(2) || '0.00'}</td>
                     <td>₹${bill.tax_amount.toFixed(2)}</td>
                   </tr>
                 </tbody>
@@ -514,9 +548,9 @@ export default function Bills() {
                   <td>Subtotal:</td>
                   <td>₹${bill.amount.toFixed(2)}</td>
                 </tr>
-                ${isGSTBill ? `
+                ${hasTax ? `
                 <tr>
-                  <td>GST (${metadata.gst_rate}%):</td>
+                  <td>${taxType} (${metadata.tax_rate}%):</td>
                   <td>₹${bill.tax_amount.toFixed(2)}</td>
                 </tr>
                 ` : ''}
@@ -597,7 +631,7 @@ export default function Bills() {
                 <h4>Terms & Conditions:</h4>
                 <p>1. Payment is due within the specified due date. Late payments may incur additional charges.</p>
                 <p>2. All disputes subject to local jurisdiction only.</p>
-                ${isGSTBill ? '<p>3. This is a computer-generated GST invoice and does not require physical signature.</p>' : ''}
+                ${hasTax ? `<p>3. This is a computer-generated ${taxType} invoice and does not require physical signature.</p>` : ''}
               </div>
             </div>
           </div>
@@ -818,54 +852,99 @@ export default function Bills() {
                 </div>
               </div>
 
-              {/* GST Toggle */}
+              {/* Tax Configuration */}
               <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                 <div>
-                  <Label htmlFor="gst_enabled" className="text-base font-semibold">GST Bill</Label>
-                  <p className="text-sm text-muted-foreground">Enable GST calculations</p>
+                  <Label htmlFor="tax_enabled" className="text-base font-semibold">Enable Tax</Label>
+                  <p className="text-sm text-muted-foreground">Add tax calculations to bill</p>
                 </div>
                 <Switch
-                  id="gst_enabled"
-                  checked={formData.gst_enabled}
-                  onCheckedChange={(checked) => setFormData({ ...formData, gst_enabled: checked })}
+                  id="tax_enabled"
+                  checked={formData.tax_enabled}
+                  onCheckedChange={(checked) => setFormData({ ...formData, tax_enabled: checked })}
                 />
               </div>
 
-              {/* GST Details (conditional) */}
-              {formData.gst_enabled && (
+              {/* Tax Details (conditional) */}
+              {formData.tax_enabled && (
                 <div className="border-b pb-4">
-                  <h3 className="font-semibold mb-3">GST Details</h3>
+                  <h3 className="font-semibold mb-3">Tax Configuration</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="company_gstin">Company GSTIN*</Label>
-                      <Input
-                        id="company_gstin"
-                        value={formData.company_gstin}
-                        onChange={(e) => setFormData({ ...formData, company_gstin: e.target.value })}
-                        required={formData.gst_enabled}
-                        placeholder="00XXXXX0000X0X0"
-                      />
+                    <div className="col-span-2">
+                      <Label htmlFor="tax_type">Tax Type*</Label>
+                      <Select
+                        value={formData.tax_type}
+                        onValueChange={(value) => setFormData({ ...formData, tax_type: value })}
+                      >
+                        <SelectTrigger id="tax_type">
+                          <SelectValue placeholder="Select tax type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="GST">GST (CGST + SGST)</SelectItem>
+                          <SelectItem value="VAT">VAT</SelectItem>
+                          <SelectItem value="Service Tax">Service Tax</SelectItem>
+                          <SelectItem value="Sales Tax">Sales Tax</SelectItem>
+                          <SelectItem value="Custom">Custom Tax</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
+
+                    {formData.tax_type === "Custom" && (
+                      <div className="col-span-2">
+                        <Label htmlFor="custom_tax_name">Custom Tax Name*</Label>
+                        <Input
+                          id="custom_tax_name"
+                          value={formData.custom_tax_name}
+                          onChange={(e) => setFormData({ ...formData, custom_tax_name: e.target.value })}
+                          required={formData.tax_type === "Custom"}
+                          placeholder="e.g., Entertainment Tax, Luxury Tax"
+                        />
+                      </div>
+                    )}
+
                     <div>
-                      <Label htmlFor="gst_rate">GST Rate (%)*</Label>
+                      <Label htmlFor="tax_rate">Tax Rate (%)*</Label>
                       <Input
-                        id="gst_rate"
+                        id="tax_rate"
                         type="number"
                         step="0.01"
-                        value={formData.gst_rate}
-                        onChange={(e) => setFormData({ ...formData, gst_rate: e.target.value })}
-                        required={formData.gst_enabled}
+                        min="0"
+                        max="100"
+                        value={formData.tax_rate}
+                        onChange={(e) => setFormData({ ...formData, tax_rate: e.target.value })}
+                        required={formData.tax_enabled}
+                        placeholder="e.g., 18"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {formData.tax_type === "GST" ? "Total GST rate (will be split into CGST/SGST)" : "Single tax rate"}
+                      </p>
                     </div>
-                    <div className="col-span-2">
-                      <Label htmlFor="client_gstin">Client GSTIN (if applicable)</Label>
-                      <Input
-                        id="client_gstin"
-                        value={formData.client_gstin}
-                        onChange={(e) => setFormData({ ...formData, client_gstin: e.target.value })}
-                        placeholder="00XXXXX0000X0X0"
-                      />
-                    </div>
+
+                    {formData.tax_type === "GST" && (
+                      <>
+                        <div>
+                          <Label htmlFor="company_gstin">Company GSTIN*</Label>
+                          <Input
+                            id="company_gstin"
+                            value={formData.company_gstin}
+                            onChange={(e) => setFormData({ ...formData, company_gstin: e.target.value.toUpperCase() })}
+                            required={formData.tax_type === "GST"}
+                            placeholder="00XXXXX0000X0X0"
+                            maxLength={15}
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Label htmlFor="client_gstin">Client GSTIN (optional)</Label>
+                          <Input
+                            id="client_gstin"
+                            value={formData.client_gstin}
+                            onChange={(e) => setFormData({ ...formData, client_gstin: e.target.value.toUpperCase() })}
+                            placeholder="00XXXXX0000X0X0"
+                            maxLength={15}
+                          />
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
@@ -1063,25 +1142,34 @@ export default function Bills() {
                   <span>Subtotal ({formData.items.length} item{formData.items.length > 1 ? 's' : ''}):</span>
                   <span className="font-semibold">₹{calculateTotalAmount().toFixed(2)}</span>
                 </div>
-                {formData.gst_enabled && (
+                {formData.tax_enabled && (
                   <>
-                    <div className="flex justify-between text-sm">
-                      <span>CGST ({(parseFloat(formData.gst_rate || "18") / 2).toFixed(2)}%):</span>
-                      <span className="font-semibold">₹{calculateGST().cgst.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>SGST ({(parseFloat(formData.gst_rate || "18") / 2).toFixed(2)}%):</span>
-                      <span className="font-semibold">₹{calculateGST().sgst.toFixed(2)}</span>
-                    </div>
+                    {formData.tax_type === "GST" ? (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span>{calculateTax().tax1Label}:</span>
+                          <span className="font-semibold">₹{calculateTax().tax1.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>{calculateTax().tax2Label}:</span>
+                          <span className="font-semibold">₹{calculateTax().tax2.toFixed(2)}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex justify-between text-sm">
+                        <span>{calculateTax().tax1Label}:</span>
+                        <span className="font-semibold">₹{calculateTax().tax1.toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-sm border-t pt-2">
-                      <span>Total GST:</span>
-                      <span className="font-semibold">₹{calculateGST().total.toFixed(2)}</span>
+                      <span>Total Tax:</span>
+                      <span className="font-semibold">₹{calculateTax().total.toFixed(2)}</span>
                     </div>
                   </>
                 )}
                 <div className="flex justify-between text-lg font-bold border-t-2 pt-2">
                   <span>Total Amount:</span>
-                  <span>₹{(calculateTotalAmount() + calculateGST().total).toFixed(2)}</span>
+                  <span>₹{(calculateTotalAmount() + calculateTax().total).toFixed(2)}</span>
                 </div>
               </div>
 
