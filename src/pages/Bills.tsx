@@ -10,14 +10,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, FileText } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Save, BookmarkPlus } from "lucide-react";
 
 export default function Bills() {
   const navigate = useNavigate();
   const [bills, setBills] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // Template states
+  const [companyProfiles, setCompanyProfiles] = useState<any[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
+  const [serviceItems, setServiceItems] = useState<any[]>([]);
+  const [saveTemplateDialogOpen, setSaveTemplateDialogOpen] = useState(false);
+  const [templateType, setTemplateType] = useState<'company' | 'client' | 'service' | null>(null);
   const [formData, setFormData] = useState({
     company_name: "",
     company_address: "",
@@ -74,6 +82,7 @@ export default function Bills() {
   useEffect(() => {
     checkAuth();
     fetchBills();
+    fetchTemplates();
   }, []);
 
   const checkAuth = async () => {
@@ -89,6 +98,111 @@ export default function Bills() {
     
     if (data) setBills(data);
     setLoading(false);
+  };
+
+  const fetchTemplates = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const [companiesRes, clientsRes, servicesRes] = await Promise.all([
+      supabase.from("company_profiles").select("*").order("created_at", { ascending: false }),
+      supabase.from("clients").select("*").order("created_at", { ascending: false }),
+      supabase.from("service_items").select("*").order("created_at", { ascending: false })
+    ]);
+
+    if (companiesRes.data) setCompanyProfiles(companiesRes.data);
+    if (clientsRes.data) setClients(clientsRes.data);
+    if (servicesRes.data) setServiceItems(servicesRes.data);
+  };
+
+  const saveCompanyTemplate = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const { error } = await supabase.from("company_profiles").insert({
+      name: formData.company_name,
+      address: formData.company_address,
+      gstin: formData.company_gstin || null,
+      phone: formData.company_phone || null,
+      email: formData.company_email || null,
+      bank_name: formData.bank_name || null,
+      account_number: formData.account_number || null,
+      ifsc_code: formData.ifsc_code || null,
+      upi_id: formData.upi_id || null,
+      created_by: session?.user.id
+    });
+
+    if (error) toast.error("Failed to save company template");
+    else {
+      toast.success("Company template saved!");
+      fetchTemplates();
+      setSaveTemplateDialogOpen(false);
+    }
+  };
+
+  const saveClientTemplate = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const { error } = await supabase.from("clients").insert({
+      name: formData.client_name,
+      email: formData.client_email || null,
+      phone: formData.client_phone || null,
+      address: formData.client_address || null,
+      gstin: formData.client_gstin || null,
+      created_by: session?.user.id
+    });
+
+    if (error) toast.error("Failed to save client template");
+    else {
+      toast.success("Client saved!");
+      fetchTemplates();
+      setSaveTemplateDialogOpen(false);
+    }
+  };
+
+  const loadCompanyProfile = (profileId: string) => {
+    const profile = companyProfiles.find(p => p.id === profileId);
+    if (profile) {
+      setFormData({
+        ...formData,
+        company_name: profile.name,
+        company_address: profile.address,
+        company_gstin: profile.gstin || "",
+        company_phone: profile.phone || "",
+        company_email: profile.email || "",
+        bank_name: profile.bank_name || "",
+        account_number: profile.account_number || "",
+        ifsc_code: profile.ifsc_code || "",
+        upi_id: profile.upi_id || ""
+      });
+      toast.success("Company profile loaded");
+    }
+  };
+
+  const loadClient = (clientId: string) => {
+    const client = clients.find(c => c.id === clientId);
+    if (client) {
+      setFormData({
+        ...formData,
+        client_name: client.name,
+        client_email: client.email || "",
+        client_phone: client.phone || "",
+        client_address: client.address || "",
+        client_gstin: client.gstin || ""
+      });
+      toast.success("Client loaded");
+    }
+  };
+
+  const addServiceFromTemplate = (serviceId: string) => {
+    const service = serviceItems.find(s => s.id === serviceId);
+    if (service) {
+      setFormData({
+        ...formData,
+        items: [...formData.items, {
+          description: service.description,
+          amount: service.default_amount?.toString() || ""
+        }]
+      });
+      toast.success("Service added");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -534,7 +648,37 @@ export default function Bills() {
             <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
               {/* Company Details Section */}
               <div className="border-b pb-4">
-                <h3 className="font-semibold mb-3">Company Details</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">Company Details</h3>
+                  <div className="flex gap-2">
+                    {companyProfiles.length > 0 && (
+                      <Select onValueChange={loadCompanyProfile}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Load saved..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {companyProfiles.map((profile) => (
+                            <SelectItem key={profile.id} value={profile.id}>
+                              {profile.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setTemplateType('company');
+                        setSaveTemplateDialogOpen(true);
+                      }}
+                    >
+                      <Save className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
                     <Label htmlFor="company_name">Company Name*</Label>
@@ -677,7 +821,37 @@ export default function Bills() {
 
               {/* Client Details Section */}
               <div className="border-b pb-4">
-                <h3 className="font-semibold mb-3">Client Details</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">Client Details</h3>
+                  <div className="flex gap-2">
+                    {clients.length > 0 && (
+                      <Select onValueChange={loadClient}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Load saved..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {clients.map((client) => (
+                            <SelectItem key={client.id} value={client.id}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setTemplateType('client');
+                        setSaveTemplateDialogOpen(true);
+                      }}
+                    >
+                      <Save className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
                     <Label htmlFor="client_name">Client Name*</Label>
@@ -722,10 +896,26 @@ export default function Bills() {
               <div className="border-b pb-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold">Bill Items (Goods/Services)</h3>
-                  <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Item
-                  </Button>
+                  <div className="flex gap-2">
+                    {serviceItems.length > 0 && (
+                      <Select onValueChange={addServiceFromTemplate}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Add from saved..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {serviceItems.map((service) => (
+                            <SelectItem key={service.id} value={service.id}>
+                              {service.description}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Item
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-4">
                   {formData.items.map((item, index) => (
@@ -756,7 +946,28 @@ export default function Bills() {
                           placeholder="0.00"
                         />
                       </div>
-                      <div className="col-span-1 flex items-end justify-center pb-2">
+                      <div className="col-span-1 flex items-end justify-center pb-2 gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={async () => {
+                            const { data: { session } } = await supabase.auth.getSession();
+                            const { error } = await supabase.from("service_items").insert({
+                              description: item.description,
+                              default_amount: parseFloat(item.amount || "0"),
+                              created_by: session?.user.id
+                            });
+                            if (error) toast.error("Failed to save service");
+                            else {
+                              toast.success("Service saved!");
+                              fetchTemplates();
+                            }
+                          }}
+                          title="Save as template"
+                        >
+                          <BookmarkPlus className="h-4 w-4" />
+                        </Button>
                         {formData.items.length > 1 && (
                           <Button
                             type="button"
@@ -825,6 +1036,30 @@ export default function Bills() {
 
               <Button type="submit" className="w-full">Generate Professional Bill</Button>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Save Template Dialog */}
+        <Dialog open={saveTemplateDialogOpen} onOpenChange={setSaveTemplateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                Save {templateType === 'company' ? 'Company Profile' : 'Client'} Template
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                This will save the current {templateType === 'company' ? 'company' : 'client'} information for quick reuse in future bills.
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setSaveTemplateDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={templateType === 'company' ? saveCompanyTemplate : saveClientTemplate}>
+                  Save Template
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

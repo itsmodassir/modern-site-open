@@ -120,6 +120,93 @@ export type Database = {
           },
         ]
       }
+      clients: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          gstin: string | null
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          gstin?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          gstin?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      company_profiles: {
+        Row: {
+          account_number: string | null
+          address: string
+          bank_name: string | null
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          gstin: string | null
+          id: string
+          ifsc_code: string | null
+          is_default: boolean | null
+          name: string
+          phone: string | null
+          updated_at: string | null
+          upi_id: string | null
+        }
+        Insert: {
+          account_number?: string | null
+          address: string
+          bank_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          gstin?: string | null
+          id?: string
+          ifsc_code?: string | null
+          is_default?: boolean | null
+          name: string
+          phone?: string | null
+          updated_at?: string | null
+          upi_id?: string | null
+        }
+        Update: {
+          account_number?: string | null
+          address?: string
+          bank_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          gstin?: string | null
+          id?: string
+          ifsc_code?: string | null
+          is_default?: boolean | null
+          name?: string
+          phone?: string | null
+          updated_at?: string | null
+          upi_id?: string | null
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           created_at: string | null
@@ -497,6 +584,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_items: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          default_amount: number | null
+          description: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          default_amount?: number | null
+          description: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          default_amount?: number | null
+          description?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       sites: {
         Row: {
